@@ -13,13 +13,13 @@ Class WoonTotaal
     End Sub
 
     Private Function GetAccessToken(ApiKey As String, Company As String, Username As String, Password As String) As String 
-        Dim myReq As HttpWebRequest = HttpWebRequest.Create(Url & "/token")
+        Dim myReq As WebRequest = HttpWebRequest.Create(Url & "/token")
         myReq.Method = "POST"
         myReq.ContentType = "application/json"
         myReq.Headers.add("Api-Key",ApiKey)
         Dim myData As String = "{""domainName"":""" & Company & """,""username"":""" & Username & """,""password"":""" & Password & """}"
         myReq.GetRequestStream.Write(System.Text.Encoding.UTF8.GetBytes(myData), 0, System.Text.Encoding.UTF8.GetBytes(myData).Count)
-        Dim myResp As HttpWebResponse = myReq.GetResponse
+        Dim myResp As WebResponse = myReq.GetResponse
         Dim myreader As New System.IO.StreamReader(myResp.GetResponseStream)
         Dim myText As String = myreader.ReadToEnd
         Dim myParsedText As JObject = JObject.Parse(myText)
@@ -27,13 +27,13 @@ Class WoonTotaal
     End Function
 
     Public Function GetListOfMaterials(SearchText as String) As List(Of String) 
-        Dim myReq As HttpWebRequest = HttpWebRequest.Create(Url & "/api/Gateway/Material/Browse")
+        Dim myReq As WebRequest = HttpWebRequest.Create(Url & "/api/Gateway/Material/Browse")
         myReq.Method = "POST"
         myReq.ContentType = "application/json"
         myReq.Headers.add("Authorization", "bearer " & AccessToken)
         Dim myData As String = "{""filter"":{""description"":""" & SearchText & """}}"
         myReq.GetRequestStream.Write(System.Text.Encoding.UTF8.GetBytes(myData), 0, System.Text.Encoding.UTF8.GetBytes(myData).Count)
-        Dim myResp As HttpWebResponse = myReq.GetResponse
+        Dim myResp As WebResponse = myReq.GetResponse
         Dim myReader As New System.IO.StreamReader(myResp.GetResponseStream)
         Dim myText As String = myReader.ReadToEnd
         Dim myParsedText As JObject = JObject.Parse(myText)
