@@ -6,9 +6,9 @@ Imports Newtonsoft.Json.Linq
 
 Module Program
 
-    Sub Main(args As String())
+    Public Sub Main(args As String())
         Dim Config as Config = New Config("config.json")
-        Dim Api As WoonTotaal = new WoonTotaal(Config.Url, Config.ApiKey, Config.Company, Config.Username, Config.Password)
+        Dim Api As WoonTotaal.Api = new WoonTotaal.Api(Config.Url, Config.ApiKey, Config.Company, Config.Username, Config.Password)
         Dim Materials As List(Of String) = Api.GetListOfMaterials("12")
         For Each s In Materials
             Console.WriteLine(s)
