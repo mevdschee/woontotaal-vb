@@ -8,6 +8,12 @@ Then to compile and run:
 
     dotnet run
 
+Or to just build:
+
+    dotnet build
+
+Enjoy!
+
 ### Install .net Core 2.2
 
 I did the following:
