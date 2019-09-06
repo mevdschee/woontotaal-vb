@@ -41,7 +41,7 @@ Class WoonTotaal
         Dim myParsedText As JObject = JObject.Parse(myText)
         Dim myMaterialNames As IEnumerable(Of JToken) = myParsedText.SelectTokens("$.items[*].description")
         Dim myMaterialStrings As List(Of String) = New List(Of String)
-        For Each s In myMaterialNames
+        For Each s as JToken In myMaterialNames
             myMaterialStrings.Add(Cstr(s))
         Next
         Return myMaterialStrings
