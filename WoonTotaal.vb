@@ -41,12 +41,37 @@ Module WoonTotaal
             Dim myReader As New System.IO.StreamReader(myResp.GetResponseStream)
             Dim myText As String = myReader.ReadToEnd
             Dim myParsedText As JObject = JObject.Parse(myText)
-            Dim myMaterialNames As IEnumerable(Of JToken) = myParsedText.SelectTokens("$.items[*].description")
-            Dim myMaterialStrings As List(Of String) = New List(Of String)
-            For Each s as JToken In myMaterialNames
-                myMaterialStrings.Add(Cstr(s))
+            Dim myModelNames As IEnumerable(Of JToken) = myParsedText.SelectTokens("$.items[*].description")
+            Dim myModelStrings As List(Of String) = New List(Of String)
+            For Each s as JToken In myModelNames
+                myModelStrings.Add(Cstr(s))
             Next
-            Return myMaterialStrings
+            Return myModelStrings
+        End Function
+
+        Private Sub AddToListOfModels(myPrefix as String, myChildren as JArray, myModelStrings As List(Of String))
+            For Each myObject as JObject In myChildren
+                Dim nextChildren As JArray = JArray.FromObject(myObject.SelectToken("$.children"))
+                Dim myDescription As String = CStr(myObject.SelectToken("$.description"))
+                Dim nextPrefix As String = myPrefix & myDescription & " / "
+                If nextChildren IsNot Nothing AndAlso nextChildren.Count()>0 Then
+                    AddToListOfModels(nextPrefix,nextChildren,myModelStrings)
+                Else
+                    myModelStrings.Add(myPrefix & myDescription)
+                End If
+            Next
+        End Sub
+
+        Public Function GetListOfModels() As List(Of String) 
+            Dim myReq As WebRequest = HttpWebRequest.Create(Url & "/api/Gateway/Model/GetAll")
+            myReq.Headers.add("Authorization", "bearer " & AccessToken)
+            Dim myResp As WebResponse = myReq.GetResponse
+            Dim myReader As New System.IO.StreamReader(myResp.GetResponseStream)
+            Dim myText As String = myReader.ReadToEnd
+            Dim myChildren As JArray = JArray.Parse(myText)
+            Dim myModelStrings As List(Of String) = New List(Of String)
+            AddToListOfModels("",myChildren,myModelStrings)
+            Return myModelStrings            
         End Function
 
     End Class

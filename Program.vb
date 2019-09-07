@@ -15,6 +15,12 @@ Module Program
         Next
         Console.WriteLine("Press Enter to continue ...")
         Console.ReadLine()
+        Dim Models As List(Of String) = Api.GetListOfModels()
+        For Each s In Models
+            Console.WriteLine(s)
+        Next
+        Console.WriteLine("Press Enter to continue ...")
+        Console.ReadLine()
     End Sub
 
 End Module
