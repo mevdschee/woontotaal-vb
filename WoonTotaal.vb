@@ -53,7 +53,7 @@ Module WoonTotaal
             For Each myObject as JObject In myChildren
                 Dim nextChildren As JArray = JArray.FromObject(myObject.SelectToken("$.children"))
                 Dim myDescription As String = CStr(myObject.SelectToken("$.description"))
-                Dim nextPrefix As String = myPrefix & myDescription & " / "
+                Dim nextPrefix As String = myPrefix & myDescription & ", "
                 If nextChildren IsNot Nothing AndAlso nextChildren.Count()>0 Then
                     AddToListOfModels(nextPrefix,nextChildren,myModelStrings)
                 Else
