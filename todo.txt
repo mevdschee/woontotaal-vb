@@ -1,0 +1,4 @@
+- lijst met materiaal+voering (stof)
+- lijst met producten
+- opsturen kamer/product/materiaal+voering/hoogte/breedte, parseren van de key/value resultaten
+- Aanpassen stel, eventueel links/rechts opgeven
