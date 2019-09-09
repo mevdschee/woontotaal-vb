@@ -1,2 +1,2 @@
-- opsturen kamer/product/materiaal+voering/hoogte/breedte, parseren van de key/value resultaten
 - Aanpassen stel, eventueel links/rechts opgeven
+- opvragen van velden: prijsspecificatie (material + wage), StukStel (lijst), Plooitype (lijst), Snijmaat, Banen links, Banen rechts, Kamerhoog (j/n) 

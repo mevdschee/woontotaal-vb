@@ -41,23 +41,28 @@ Module WoonTotaal
             Dim myReader As New System.IO.StreamReader(myResp.GetResponseStream)
             Dim myText As String = myReader.ReadToEnd
             Dim myParsedText As JObject = JObject.Parse(myText)
-            Dim myModelNames As IEnumerable(Of JToken) = myParsedText.SelectTokens("$.items[*].description")
+            Dim myModelNames As IEnumerable(Of JToken) = myParsedText.SelectTokens("$.items[*]")
             Dim myModelStrings As List(Of String) = New List(Of String)
-            For Each s as JToken In myModelNames
-                myModelStrings.Add(Cstr(s))
+            For Each myModelName as JToken In myModelNames
+                Dim myDescription as JToken = myModelName.SelectToken("$.description")
+                Dim myMaterialId as JToken = myModelName.SelectToken("$.id")
+                Dim myIsWage as JToken = myModelName.SelectToken("$.isWage")
+                If Not CBool(myIsWage) Then
+                    myModelStrings.Add(Cstr(myDescription) & " / " & Cstr(myMaterialId))
+                End If
             Next
             Return myModelStrings
         End Function
 
-        Private Sub AddToListOfModels(myPrefix as String, myChildren as JArray, myModelStrings As List(Of String))
+        Private Sub AddToListOfModels(myChildren as JArray, myModelStrings As List(Of String))
             For Each myObject as JObject In myChildren
                 Dim nextChildren As JArray = JArray.FromObject(myObject.SelectToken("$.children"))
-                Dim myDescription As String = CStr(myObject.SelectToken("$.description"))
-                Dim nextPrefix As String = myPrefix & myDescription & ", "
+                Dim myDescription As JToken = myObject.SelectToken("$.fullDescription")
+                Dim myModelId As JToken = myObject.SelectToken("$.id")
                 If nextChildren IsNot Nothing AndAlso nextChildren.Count()>0 Then
-                    AddToListOfModels(nextPrefix,nextChildren,myModelStrings)
+                    AddToListOfModels(nextChildren,myModelStrings)
                 Else
-                    myModelStrings.Add(myPrefix & myDescription)
+                    myModelStrings.Add(Cstr(myDescription) & " / " & Cstr(myModelId))
                 End If
             Next
         End Sub
@@ -70,8 +75,30 @@ Module WoonTotaal
             Dim myText As String = myReader.ReadToEnd
             Dim myChildren As JArray = JArray.Parse(myText)
             Dim myModelStrings As List(Of String) = New List(Of String)
-            AddToListOfModels("",myChildren,myModelStrings)
+            AddToListOfModels(myChildren,myModelStrings)
             Return myModelStrings            
+        End Function
+
+
+        Public Function GetPropertiesForOrder(ModelId As Integer, MaterialId As Integer, Width As Integer, Height as Integer) As List(Of String)
+            Dim myParams = "?modelId=" & CStr(ModelId) & "&materialId=" & CStr(MaterialId) & "&width=" & CStr(Width) & "&height=" & CStr(Height)
+            Dim myReq As WebRequest = HttpWebRequest.Create(Url & "/api/Gateway/Project/CreateProjectWithPolygon" & myParams)
+            myReq.Method = "POST"
+            myReq.ContentType = "application/json"
+            myReq.Headers.add("Authorization", "bearer " & AccessToken)
+            Dim myData As String = "{}"
+            myReq.GetRequestStream.Write(System.Text.Encoding.UTF8.GetBytes(myData), 0, System.Text.Encoding.UTF8.GetBytes(myData).Count)
+            Dim myResp As WebResponse = myReq.GetResponse
+            Dim myReader As New System.IO.StreamReader(myResp.GetResponseStream)
+            Dim myText As String = myReader.ReadToEnd
+
+'Dim objWriter As New System.IO.StreamWriter( "materials.json" )
+'objWriter.Write( myText )
+'objWriter.Close()
+
+            Dim myChildren As JArray = JArray.Parse(myText)
+            Dim myProperties As List(Of String)  = New List(Of String)
+            Return myProperties            
         End Function
 
     End Class
