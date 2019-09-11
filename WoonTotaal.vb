@@ -142,7 +142,7 @@ Module WoonTotaal
         End Sub
 
         Public Function GetPropertiesForOrder(ModelId As Integer, MaterialId As Integer, Width As Integer, Height as Integer) As List(Of String)
-            Dim myParams = "?modelId=" & CStr(ModelId) & "&materialId=" & CStr(MaterialId) & "&width=" & CStr(Width) & "&height=" & CStr(Height)
+            Dim myParams As String = "?modelId=" & CStr(ModelId) & "&materialId=" & CStr(MaterialId) & "&width=" & CStr(Width) & "&height=" & CStr(Height)
             Dim myReq As WebRequest = HttpWebRequest.Create(Url & "/api/Gateway/Project/CreateProjectWithPolygon" & myParams)
             myReq.Method = "POST"
             myReq.ContentType = "application/json"
