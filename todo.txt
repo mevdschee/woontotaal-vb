@@ -1,2 +1,16 @@
 - Aanpassen stel, eventueel links/rechts opgeven
+
+displayLabel,value,displaySuffix,dataType,listValues.description
+
+Datatype map
+11~string
+10~boolean
+4~integer
+2~double
+1~label
+
+Verdeling~Stel~~string~Ongelijk stel`Stel`Stuk links`Stuk rechts
+Verzw. staafjes~true~~boolean
+Plooifactor bruto~2,16~~double~
+
 - opvragen van velden: prijsspecificatie (material + wage), StukStel (lijst), Plooitype (lijst), Snijmaat, Banen links, Banen rechts, Kamerhoog (j/n) 
