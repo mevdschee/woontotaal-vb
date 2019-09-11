@@ -2,6 +2,7 @@ Option Strict On
 
 Imports System.IO
 Imports System.Net
+Imports System.Globalization
 Imports Newtonsoft.Json.Linq
 
 Module WoonTotaal
@@ -82,7 +83,7 @@ Module WoonTotaal
         Private Function GetDataType(DataType as Integer) As String
             Dim myTypes As Dictionary(Of Integer, String) = New Dictionary(Of Integer, String)()
             myTypes.Add(1,"label")
-            myTypes.Add(2,"double")
+            myTypes.Add(2,"decimal")
             myTypes.Add(4,"integer")
             myTypes.Add(10,"boolean")
             myTypes.Add(11,"string")
@@ -116,6 +117,30 @@ Module WoonTotaal
             Return Cstr(myDisplayLabel) & "~" & myValueString & "~" & Cstr(myDisplaySuffix) & "~" & GetDataType(CInt(myDataType)) & "~" & myListValueString
         End Function
 
+        Private Sub AddPriceProperties(myParsedText As JObject, myPropertyStrings As List(Of String))
+            Dim myPriceGroups As IEnumerable(Of JToken) = myParsedText.SelectTokens("$.polygons[0].prices.priceGroups[*]")
+            For Each myPriceGroup as JToken In myPriceGroups
+                Dim myTypeName as String = "Arbeid"
+                If CStr(myPriceGroup.SelectToken("$.code")) = "MATERIAL" Then
+                    myTypeName = "Artikel"
+                End If
+                Dim myElements As IEnumerable(Of JToken) = myPriceGroup.SelectTokens("$.elements[*]")
+                Dim myTotalLines As Double = 0
+                Dim myLines As List(Of String) = New List(Of String)
+                For Each myElement as JToken In myElements
+                    Dim myCode as JToken = myElement.SelectToken("$.code")
+                    Dim myDescription as JToken = myElement.SelectToken("$.description")
+                    Dim myQuantity as JToken = myElement.SelectToken("$.quantity")
+                    Dim myUnit as JToken = myElement.SelectToken("$.unit")
+                    Dim myUnitPrice as JToken = myElement.SelectToken("$.unitPrice")
+                    Dim myTotalPrice as JToken = myElement.SelectToken("$.totalPrice")
+                    myTotalLines += CDbl(myTotalPrice)
+                    myLines.Add(CStr(myCode) & "|" & Cstr(myDescription) & "|" & Cstr(myQuantity) & "|" & Cstr(myUnit) & "|" & CDbl(myUnitPrice).ToString("0.00") & "|" & CDbl(myTotalPrice).ToString("0.00"))
+                Next
+                myPropertyStrings.Add(myTypeName & " prijs totaal~" & myTotalLines.ToString("0.00") & "~eur~label~" & String.Join("`", myLines))
+            Next
+        End Sub
+
         Public Function GetPropertiesForOrder(ModelId As Integer, MaterialId As Integer, Width As Integer, Height as Integer) As List(Of String)
             Dim myParams = "?modelId=" & CStr(ModelId) & "&materialId=" & CStr(MaterialId) & "&width=" & CStr(Width) & "&height=" & CStr(Height)
             Dim myReq As WebRequest = HttpWebRequest.Create(Url & "/api/Gateway/Project/CreateProjectWithPolygon" & myParams)
@@ -133,25 +158,7 @@ Module WoonTotaal
             For Each myProperty as JToken In myProperties
                 myPropertyStrings.Add(GetPropertyString(myProperty))
             Next
-
-            Dim myPriceGroups As IEnumerable(Of JToken) = myParsedText.SelectTokens("$.polygons[0].prices.priceGroups[*]")
-            For Each myPriceGroup as JToken In myPriceGroups
-                Dim myCode as JToken = myPriceGroup.SelectToken("$.code")
-                Dim myUnitName as String = "Arbeid"
-                If CStr(myCode) = "MATERIAL" Then
-                    myUnitName = "Artikel"
-                End If
-                Dim myElements As IEnumerable(Of JToken) = myPriceGroup.SelectTokens("$.elements[*]")
-                For Each myElement as JToken In myElements
-                    Dim myQuantity as JToken = myElement.SelectToken("$.quantity")
-                    Dim myUnit as JToken = myElement.SelectToken("$.unit")
-                    Dim myDescription as JToken = myElement.SelectToken("$.description")
-                    Dim myUnitPrice as JToken = myElement.SelectToken("$.unitPrice")
-                    Dim myTotalPrice as JToken = myElement.SelectToken("$.totalPrice")
-                    Dim myLine As String = Cstr(myQuantity) & "`" & Cstr(myUnit) & "`" & Cstr(myDescription) & "`" & Cstr(myUnitPrice) & "`" & Cstr(myTotalPrice)
-                    myPropertyStrings.Add("Offerteregel~" & myLine & "~" & myUnitName & "~label~")
-                Next
-            Next
+            AddPriceProperties(myParsedText, myPropertyStrings)
             'Dim objWriter As New System.IO.StreamWriter("properties.json")
             'objWriter.Write( myText )
             'objWriter.Close()
